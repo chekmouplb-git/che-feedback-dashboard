@@ -2,8 +2,11 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'CHE Driver Dashboard',
-  description: 'Driver Efficiency & Feedback Dashboard — College of Human Ecology, UPLB',
+  title: 'CHE Feedback Hub',
+  description: 'Feedback Dashboard — College of Human Ecology, UPLB',
+  icons: {
+    icon: '/favicon.png',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
