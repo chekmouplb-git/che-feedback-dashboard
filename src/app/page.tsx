@@ -43,7 +43,7 @@ export default function Home() {
         </div>
 
         <footer style={{ textAlign: 'center', padding: '12px 0 20px', color: '#94A3B8', fontSize: 11 }}>
-          CHE Feedback Hub · All data from Google Forms · {new Date().getFullYear()}
+          CHE Feedback Hub  · {new Date().getFullYear()}
         </footer>
       </div>
     </div>
