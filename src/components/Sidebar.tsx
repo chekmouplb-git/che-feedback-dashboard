@@ -1,7 +1,7 @@
 'use client';
 
 import { ModuleConfig, ModuleId } from '@/types';
-import { Gauge, Sparkles, Droplets, Plus, ChevronLeft, ChevronRight, ClipboardList } from 'lucide-react';
+import { Gauge, Sparkles, Droplets, ChevronLeft, ChevronRight, ClipboardList } from 'lucide-react';
 
 interface SidebarProps {
   modules: ModuleConfig[];
@@ -154,25 +154,6 @@ export default function Sidebar({ modules, activeId, onChange, collapsed, onTogg
           </button>
         );
       })}
-
-      {/* Add more slot */}
-      <div style={{ marginTop: 'auto', display: 'flex', justifyContent: collapsed ? 'center' : 'flex-start', padding: collapsed ? '0' : '0 8px' }}>
-        <div style={{
-          width: collapsed ? 40 : '100%',
-          height: 40,
-          borderRadius: 10,
-          border: '1.5px dashed #1B4332',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: collapsed ? 'center' : 'flex-start',
-          gap: 10,
-          padding: collapsed ? '0' : '0 12px',
-          cursor: 'default',
-        }}>
-          <Plus size={16} color="#374151" />
-          {!collapsed && <span style={{ fontSize: 12, color: '#374151', whiteSpace: 'nowrap' }}>Add module</span>}
-        </div>
-      </div>
     </aside>
   );
 }
