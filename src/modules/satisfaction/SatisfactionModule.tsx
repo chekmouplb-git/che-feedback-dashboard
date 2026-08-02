@@ -5,6 +5,7 @@ import { Search, Users, Star, TrendingUp, RefreshCw, Calendar, ClipboardList } f
 import { SatisfactionRow } from '@/types';
 import { computeStaffStats, parseRating } from './data';
 import { APPS_SCRIPT_URLS } from '@/lib/config';
+import { parseRowDate, inDateRange } from '@/lib/dateFilter';
 import StaffCard from './StaffCard';
 import StaffDetail from './StaffDetail';
 
@@ -98,12 +99,19 @@ export default function SatisfactionModule() {
   const filteredByDate = useMemo(() => {
     if (!dateFrom && !dateTo) return rawData;
     return rawData.filter((row) => {
-      const d = row.dateOfTransaction ? new Date(row.dateOfTransaction) : null;
-      if (!d) return true;
-      if (dateFrom && d < new Date(dateFrom)) return false;
-      if (dateTo && d > new Date(dateTo + 'T23:59:59')) return false;
-      return true;
+      // Filter on the submission timestamp (always present), falling back to
+      // the manually entered date of transaction if a timestamp is missing.
+      const d = parseRowDate(row.timestamp) ?? parseRowDate(row.dateOfTransaction);
+      return inDateRange(d, dateFrom, dateTo);
     });
+  }, [rawData, dateFrom, dateTo]);
+
+  // Responses we had to leave out because they carry no readable date
+  const undatedCount = useMemo(() => {
+    if (!dateFrom && !dateTo) return 0;
+    return rawData.filter(
+      (row) => !parseRowDate(row.timestamp) && !parseRowDate(row.dateOfTransaction)
+    ).length;
   }, [rawData, dateFrom, dateTo]);
 
   const allStaff = useMemo(() =>
@@ -187,7 +195,12 @@ export default function SatisfactionModule() {
           </div>
           {isDateFiltered && (
             <span style={{ fontSize: 12, color: '#7C3AED', fontWeight: 600, whiteSpace: 'nowrap' }}>
-              {totalResponses} response{totalResponses !== 1 ? 's' : ''} in range
+              {totalResponses} of {rawData.length} response{rawData.length !== 1 ? 's' : ''} in range
+              {undatedCount > 0 && (
+                <span style={{ color: '#94A3B8', fontWeight: 500 }}>
+                  {' '}· {undatedCount} without a date
+                </span>
+              )}
             </span>
           )}
         </div>
