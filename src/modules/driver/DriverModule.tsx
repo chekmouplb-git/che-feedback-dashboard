@@ -5,6 +5,7 @@ import { Search, Users, Star, TrendingUp, RefreshCw, Gauge, Calendar } from 'luc
 import { FeedbackRow } from '@/types';
 import { computeDriverStats } from './data';
 import { APPS_SCRIPT_URLS } from '@/lib/config';
+import { parseRowDate, inDateRange } from '@/lib/dateFilter';
 import DriverCard from './DriverCard';
 import DriverDetail from './DriverDetail';
 import DataImport from '@/components/DataImport';
@@ -108,12 +109,19 @@ export default function DriverModule() {
   const filteredByDate = useMemo(() => {
     if (!dateFrom && !dateTo) return rawData;
     return rawData.filter((row) => {
-      const tripDate = row.dateOfTrip ? new Date(row.dateOfTrip) : null;
-      if (!tripDate) return true;
-      if (dateFrom && tripDate < new Date(dateFrom)) return false;
-      if (dateTo && tripDate > new Date(dateTo + 'T23:59:59')) return false;
-      return true;
+      // Filter on the trip date, falling back to the submission timestamp
+      // when a respondent left the trip date blank.
+      const d = parseRowDate(row.dateOfTrip) ?? parseRowDate(row.timestamp);
+      return inDateRange(d, dateFrom, dateTo);
     });
+  }, [rawData, dateFrom, dateTo]);
+
+  // Trips we had to leave out because they carry no readable date
+  const undatedCount = useMemo(() => {
+    if (!dateFrom && !dateTo) return 0;
+    return rawData.filter(
+      (row) => !parseRowDate(row.dateOfTrip) && !parseRowDate(row.timestamp)
+    ).length;
   }, [rawData, dateFrom, dateTo]);
 
   const drivers = useMemo(() =>
@@ -219,7 +227,12 @@ export default function DriverModule() {
 
           {isDateFiltered && (
             <span style={{ fontSize: 12, color: '#40916C', fontWeight: 600, whiteSpace: 'nowrap' }}>
-              {totalTrips} trip{totalTrips !== 1 ? 's' : ''} in range
+              {totalTrips} of {rawData.length} trip{rawData.length !== 1 ? 's' : ''} in range
+              {undatedCount > 0 && (
+                <span style={{ color: '#94A3B8', fontWeight: 500 }}>
+                  {' '}· {undatedCount} without a date
+                </span>
+              )}
             </span>
           )}
         </div>
